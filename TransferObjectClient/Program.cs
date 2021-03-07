@@ -8,17 +8,16 @@ namespace TransferObjectClient
         {
             Customer customer = new Customer()
             {
-                Id = 2,
-                Name = "Maria"
+                Id = 7,
+                Name = "Oliver"
             };
 
             ClientTransfer client = new ClientTransfer();
             client.Start();
             client.WriteToServer(customer);
             Console.WriteLine("Client send an object to server");
-            
-            
             client.ReadFromServer();
+
         }
     }
 }

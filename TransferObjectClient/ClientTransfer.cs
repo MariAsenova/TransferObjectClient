@@ -31,11 +31,29 @@ namespace TransferObjectClient
 
         public void ReadFromServer()
         {
-            byte[] dataFromServer = new byte[1024];
-            int bytesRead = networkStream.Read(dataFromServer, 0, dataFromServer.Length);
-            string messageFromServer = Encoding.ASCII.GetString(dataFromServer, 0, bytesRead);
-            Customer customer = JsonSerializer.Deserialize<Customer>(messageFromServer);
-            Console.WriteLine("Reading customer from server: " + customer.Id);
+            if (networkStream.CanRead)
+            {
+                byte[] readBuffer = new byte[1024];
+                StringBuilder message = new StringBuilder();
+                int bytesRead = 0;
+
+                do
+                {
+                    bytesRead = networkStream.Read(readBuffer, 0, readBuffer.Length);
+                    message.AppendFormat("{0}", Encoding.ASCII.GetString(readBuffer, 0, bytesRead));
+                } while (networkStream.DataAvailable);
+                
+                Console.WriteLine("C# receives from Java server: " + (message));
+                Customer customer = JsonSerializer.Deserialize<Customer>(message.ToString(), new JsonSerializerOptions()
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                });
+                Console.WriteLine("Deserialized obj from server: " + customer.Name);
+            }
+            else
+            {
+                Console.WriteLine("Cannot read from the network stream");
+            }
         }
     }
 }
